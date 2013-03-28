@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ -z "$1" ] ; then
+cmd=`basename $0`
+echo "${cmd} <Port>"
+exit
+fi
+python -m SimpleHTTPServer $1
