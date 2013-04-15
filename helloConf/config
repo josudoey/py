@@ -1,0 +1,10 @@
+[DEFAULT]
+name = fajoy
+email = wuminfajoy@gmail.com
+
+[helloSection]
+git = https://github.com/
+
+[helloSection2]
+git = https://github.com/fajoy/
+
