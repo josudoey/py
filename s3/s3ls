@@ -1,0 +1,84 @@
+#!/usr/bin/env python
+#ref https://github.com/boto/boto/blob/develop/docs/source/s3_tut.rst
+import boto
+from boto.s3.connection import S3Connection
+import getopt, sys
+
+
+
+def sizeof_fmt(num):
+    for x in ['b ','KB','MB','GB','TB', 'XB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
+    return "%3.1f %s" % (num, x)
+
+def list_buckets(s3):
+    for bucket in s3.get_all_buckets():
+            print "{created}\t{name}".format(
+                name = bucket.name,
+                created = bucket.creation_date,
+            )
+            bucket=s3.get_bucket(bucket.name)
+
+def list_object(s3,bucket,prefix=None):
+    from boto.s3.prefix import Prefix
+    from boto.s3.key import Key
+    b=s3.get_bucket(bucket)
+    total = 0
+    query = b
+
+    if prefix:
+        if not prefix.endswith("/"):
+            prefix = prefix + "/"
+        query = b.list(prefix=prefix, delimiter="/")
+        print "%s" % prefix
+    num = 0
+    for k in query:
+        num += 1
+        mode = "-rwx---"
+        if isinstance(k, Prefix):
+            mode = "drwxr--"
+            size = 0
+        else:
+            size = k.size
+            for g in k.get_acl().acl.grants:
+                if g.id == None:
+                    if g.permission == "READ":
+                        mode = "-rwxr--"
+                    elif g.permission == "FULL_CONTROL":
+                        mode = "-rwxrwx"
+        if isinstance(k, Key):
+           print "%s\t%s\t%010s\t%s" % (mode, k.last_modified,
+                 sizeof_fmt(size), k.name)
+        else:
+           #If it's not a Key object, it doesn't have a last_modified time, so
+           #print nothing instead
+           print "%s\t%s\t%010s\t%s" % (mode, ' '*24,
+              0, k.name)
+        total += size
+    print "="*80
+    print "\t\tTOTAL:  \t%010s \t%i Files" % (sizeof_fmt(total), num)
+
+if __name__ == "__main__":
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "b:p:",['bucket=','prefix='] )
+    except getopt.GetoptError as err:
+        print "GetoptErro"
+        usage()
+        sys.exit(2)
+
+    bucket=None
+    prefix=None
+    for o, a in opts:
+        if o in ("-b", "--bucekt"):
+            bucket = a
+        else:
+            prefix=a
+ 
+    s3=boto.connect_s3(calling_format = boto.s3.connection.OrdinaryCallingFormat(),)
+    
+    if bucket:
+        list_object(s3,bucket, prefix)
+    else:
+        list_buckets(s3)
