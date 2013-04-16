@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#ref http://docs.python.org/2/library/argparse.html#module-argparse
+#ref http://docs.python.org/2/library/getopt.html
 import getopt, sys
 
 def main():
