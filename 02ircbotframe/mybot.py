@@ -1,4 +1,5 @@
 #!/usr/bin/ptyhon2
+#ref https://github.com/LukeusMaximus/Python-IRC-Bot-Framework
 from ircbotframe import ircBot
 import sys
 import os,time,threading
