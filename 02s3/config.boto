@@ -1,0 +1,21 @@
+#$HOME/.boto
+#boto config example
+
+#ref https://github.com/boto/boto/blob/develop/docs/source/boto_config_tut.rst
+[Credentials]
+aws_access_key_id = <aws access key>
+aws_secret_access_key = <aws secret key>
+
+[s3]
+
+#ref https://github.com/boto/boto/blob/develop/boto/s3/connection.py#L149
+host = s3.amazonaws.com
+
+#https://github.com/boto/boto/blob/develop/boto/s3/connection.py#L115
+#default boto.s3.connection.SubdomainCallingFormat
+calling_format = boto.s3.connection.OrdinaryCallingFormat
+
+[Boto]
+#use http
+is_secure = False
+#debug = 2
