@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+#ref https://github.com/boto/boto/blob/develop/docs/source/s3_tut.rst
+import boto
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+import getopt, sys
+
+
+def usage():
+    print """useage: s3set -b <bucket> -k <key> [-v <value> || -f <file> ]"""
+
+#ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L1243
+def s3set_from_string(s3,bucket,key,value):
+    b = s3.get_bucket(bucket) 
+    k = Key(b)
+    k.key = key
+    k.set_contents_from_string(value) 
+
+#ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L910
+def s3set_from_filename(s3,bucket,key,filename):
+    b = s3.get_bucket(bucket) 
+    k = Key(b)
+    k.key = key
+    k.set_contents_from_filename(filename)
+    
+
+if __name__ == "__main__":
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "b:k:v:f:",['bucket=','key=','value=','file='] )
+    except getopt.GetoptError as err:
+        print "Getopt Error."
+        usage()
+        sys.exit(2)
+
+    bucket=None
+    key=None
+    value=None
+    filename=None
+    for o, a in opts:
+        if o in ("-b", "--bucekt"):
+            bucket = a
+        elif o in ("-k", "--key"):
+            key = a
+        elif o in ("-v", "--value"):
+            value = a
+        elif o in ("-f", "--file"):
+            filename = a
+        else:
+            print "error option : [%s]" ,o
+            usage()
+
+    if bucket is None or key is None:
+        usage()
+        sys.exit(0)
+
+    #ref https://github.com/boto/boto/blob/develop/boto/s3/connection.py#L149   
+    s3=boto.connect_s3()
+    if filename:
+        s3set_from_filename(s3,bucket,key,filename)
+        sys.exit(0)
+    if value:
+        s3set_from_string(s3,bucket,key,value)
+        sys.exit(0)
+
+    usage()
+    sys.exit(0)

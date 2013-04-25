@@ -1,0 +1,29 @@
+#!/usr/bin/env python
+from novaclient.v1_1 import client
+from novaclient import utils
+import os
+from pprint import pprint
+if __name__ == "__main__":
+    USER=os.getenv("OS_USERNAME")
+    PASS=os.getenv("OS_PASSWORD")
+    TENANT=os.getenv("OS_TENANT_NAME")
+    AUTH_URL=os.getenv("OS_AUTH_URL")
+    #ref https://github.com/openstack/python-novaclient/blob/master/novaclient/v1_1/client.py#L69
+    nt = client.Client(USER, PASS, TENANT, AUTH_URL, service_type="compute")
+
+    #ref https://github.com/openstack/python-novaclient/blob/master/novaclient/v1_1/shell.py#L737
+    image_list = nt.images.list()
+    def parse_server_name(image):
+        try:
+            return image.server['id']
+        except (AttributeError, KeyError):
+            return ''
+
+    fmts = {'Server': parse_server_name}
+    utils.print_list(image_list, ['ID', 'Name', 'Status', 'Server'],fmts, sortby_index=1)
+
+    #debug
+    """
+    for o in image_list:
+        pprint(vars(o), depth=10, width=60)
+    """

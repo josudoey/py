@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+from novaclient.v1_1 import client
+from novaclient import utils
+import os
+from pprint import pprint
+if __name__ == "__main__":
+    USER=os.getenv("OS_USERNAME")
+    PASS=os.getenv("OS_PASSWORD")
+    TENANT=os.getenv("OS_TENANT_NAME")
+    AUTH_URL=os.getenv("OS_AUTH_URL")
+    #ref https://github.com/openstack/python-novaclient/blob/master/novaclient/v1_1/client.py#L69
+    nt = client.Client(USER, PASS, TENANT, AUTH_URL, service_type="compute")
+    
+    cs=nt
+    #ref https://github.com/openstack/python-novaclient/blob/master/novaclient/v1_1/shell.py#L920
+    formatters = {}
+    field_titles = []
+    id_col = 'ID'
+
+    servers = cs.servers.list()
+    convert = [('OS-EXT-SRV-ATTR:host', 'host'),
+               ('OS-EXT-STS:task_state', 'task_state'),
+               ('OS-EXT-SRV-ATTR:instance_name', 'instance_name'),
+               ('hostId', 'host_id')]
+
+    def _translate_keys(collection, convert):
+        for item in collection:
+            keys = item.__dict__.keys()
+        for from_key, to_key in convert:
+            if from_key in keys and to_key not in keys:
+                setattr(item, to_key, item._info[from_key])
+
+    _translate_keys(servers, convert)
+    if field_titles:
+        columns = [id_col] + field_titles
+    else:
+        columns = [id_col, 'Name', 'Status', 'Networks']
+    formatters['Networks'] = utils._format_servers_list_networks
+    utils.print_list(servers, columns,
+                     formatters, sortby_index=1)
+
+
+    #debug
+    """
+    for o in servers:
+        pprint(vars(o), depth=10, width=60)
+    """

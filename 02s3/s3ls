@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+#ref https://github.com/boto/boto/blob/develop/docs/source/s3_tut.rst
+import boto
+from boto.s3.connection import S3Connection
+from boto.s3.prefix import Prefix
+from boto.s3.key import Key
+import getopt, sys
+
+def usage():
+    print """useage: s3ls [-b <bucket>] [-p <prefix>]"""
+
+def list_buckets(s3):
+    for bucket in s3.get_all_buckets():
+            print "{created}\t{name}".format(
+                name = bucket.name,
+                created = bucket.creation_date,
+            )
+            bucket=s3.get_bucket(bucket.name)
+
+def list_object(s3,bucket,prefix=None):
+    b=s3.get_bucket(bucket)
+    query = b
+
+    if prefix:
+        if not prefix.endswith("/"):
+            prefix = prefix + "/"
+        query = b.list(prefix=prefix, delimiter="/")
+    
+    for k in query:
+        size = k.size
+        print "%s\t%010s\t%s" % (k.last_modified,size, k.name)
+
+        """debug
+        from pprint import pprint
+        pprint(vars(k), depth=10, width=60)
+        """
+
+if __name__ == "__main__":
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "b:p:",['bucket=','prefix='] )
+    except getopt.GetoptError as err:
+        print "GetoptErro"
+        usage()
+        sys.exit(2)
+
+    bucket=None
+    prefix=None
+    for o, a in opts:
+        if o in ("-b", "--bucekt"):
+            bucket = a
+        if o in ("-p", "--prefix"):
+            prefix=a
+        else:
+            usage()
+ 
+    s3=boto.connect_s3()
+    
+    if bucket:
+        list_object(s3,bucket, prefix)
+    else:
+        list_buckets(s3)

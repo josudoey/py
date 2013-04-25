@@ -2,16 +2,25 @@
 #ref https://github.com/boto/boto/blob/develop/docs/source/s3_tut.rst
 import boto
 from boto.s3.connection import S3Connection
+from boto.s3.key import Key
 import getopt, sys
-def s3get(s3,bucket,key):
-    from boto.s3.key import Key
+
+def usage():
+    print """useage: s3get -b <bucket> -k <key> [ -f <file> ]"""
+
+#ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L1581
+def s3get_to_stdout(s3,bucket,key):
     b = s3.get_bucket(bucket) 
     k = Key(b)
     k.key = key
     sys.stdout.write(k.get_contents_as_string())
 
-def usage():
-    pass
+#ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L1515
+def s3get_to_filename(s3,bucket,key,filename):
+    b = s3.get_bucket(bucket) 
+    k = Key(b)
+    k.key = key
+    k.get_contents_to_filename(filename)
 
 if __name__ == "__main__":
     try:
@@ -19,17 +28,25 @@ if __name__ == "__main__":
     except getopt.GetoptError as err:
         usage()
         sys.exit(2)
+
+    bucket=None
+    key=None
+    value=None
+    filename=None
     for o, a in opts:
         if o in ("-b", "--bucekt"):
             bucket = a
         elif o in ("-k", "--key"):
             key = a
         elif o in ("-f", "--file"):
-            file = a
+            filename = a
         else:
             print "error option : [%s]" ,o
             usage()
             sys.exit(2)
     
-    s3=boto.connect_s3(calling_format = boto.s3.connection.OrdinaryCallingFormat(),)
-    s3get(s3,bucket,key)
+    s3=boto.connect_s3()
+    if filename:
+        s3get_to_filename(s3,bucket,key,filename)
+    else:
+        s3get_to_stdout(s3,bucket,key)
