@@ -7,26 +7,30 @@ import getopt, sys
 
 
 def usage():
-    print """useage: s3set -b <bucket> -k <key> [-v <value> || -f <file> ]"""
+    print """useage: s3set -b <bucket> -k <key> [-v <value> || -f <file> ] [-m <json_metadata>]"""
 
 #ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L1243
-def s3set_from_string(s3,bucket,key,value):
+def s3set_from_string(s3,bucket,key,value,meta=None):
     b = s3.get_bucket(bucket) 
     k = Key(b)
     k.key = key
+    if meta:
+        k.metadata=meta
     k.set_contents_from_string(value) 
 
 #ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L910
-def s3set_from_filename(s3,bucket,key,filename):
+def s3set_from_filename(s3,bucket,key,filename,meta=None):
     b = s3.get_bucket(bucket) 
     k = Key(b)
     k.key = key
+    if meta:
+        k.metadata=mata
     k.set_contents_from_filename(filename)
     
 
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "b:k:v:f:",['bucket=','key=','value=','file='] )
+        opts, args = getopt.getopt(sys.argv[1:], "b:k:v:f:m:",['bucket=','key=','value=','file=','meta='] )
     except getopt.GetoptError as err:
         print "Getopt Error."
         usage()
@@ -36,6 +40,7 @@ if __name__ == "__main__":
     key=None
     value=None
     filename=None
+    meta="{}"
     for o, a in opts:
         if o in ("-b", "--bucekt"):
             bucket = a
@@ -45,6 +50,9 @@ if __name__ == "__main__":
             value = a
         elif o in ("-f", "--file"):
             filename = a
+        elif o in ("-m", "--meta"):
+            import json
+            meta = json.loads(a)
         else:
             print "error option : [%s]" ,o
             usage()
@@ -56,10 +64,10 @@ if __name__ == "__main__":
     #ref https://github.com/boto/boto/blob/develop/boto/s3/connection.py#L149   
     s3=boto.connect_s3()
     if filename:
-        s3set_from_filename(s3,bucket,key,filename)
+        s3set_from_filename(s3,bucket,key,filename,meta=meta)
         sys.exit(0)
     if value:
-        s3set_from_string(s3,bucket,key,value)
+        s3set_from_string(s3,bucket,key,value,meta=meta)
         sys.exit(0)
 
     usage()
