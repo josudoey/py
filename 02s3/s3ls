@@ -15,26 +15,28 @@ def list_buckets(s3):
                 name = bucket.name,
                 created = bucket.creation_date,
             )
-            bucket=s3.get_bucket(bucket.name)
 
 def list_object(s3,bucket,prefix=None):
     b=s3.get_bucket(bucket)
-    query = b
-
+    query = b.list()
     if prefix:
         if not prefix.endswith("/"):
             prefix = prefix + "/"
         query = b.list(prefix=prefix, delimiter="/")
     
     for k in query:
-        size = k.size
-        print "%s\t%010s\t%s" % (k.last_modified,size, k.name)
+        if isinstance(k,Key):
+            size = k.size
+            print "%s\t%010s\t%s" % (k.last_modified,size, k.name)
+        if isinstance(k,Prefix):
+            print "%024s\t%010s\t%s" % ("-","prefix",k.name)
 
-        """debug
+
+#debug
+"""
         from pprint import pprint
         pprint(vars(k), depth=10, width=60)
-        """
-
+"""
 if __name__ == "__main__":
     try:
         opts, args = getopt.getopt(sys.argv[1:], "b:p:",['bucket=','prefix='] )
@@ -48,10 +50,11 @@ if __name__ == "__main__":
     for o, a in opts:
         if o in ("-b", "--bucekt"):
             bucket = a
-        if o in ("-p", "--prefix"):
+        elif o in ("-p", "--prefix"):
             prefix=a
         else:
             usage()
+            sys.exit(2)
  
     s3=boto.connect_s3()
     

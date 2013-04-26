@@ -13,10 +13,10 @@ def usage():
 #ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L586
 def s3rm_delete_by_key(s3,bucket,key):
     b = s3.get_bucket(bucket) 
-    k = Key(b)
-    k.key = key
-    print "deleted %s"%k.key
-    k.delete()
+    k=b.get_key(key)
+    if isinstance(k,Key):
+        print "deleted %s"%k.key
+        k.delete()
 
 def s3rm_delete_by_prefix(s3,bucket,prefix):
     b=s3.get_bucket(bucket)
@@ -24,8 +24,9 @@ def s3rm_delete_by_prefix(s3,bucket,prefix):
         prefix = prefix + "/"
     query=b.list(prefix=prefix)
     for k in query:
-        print "deleted %s"%k.key
-        k.delete()
+        if isinstance(k,Key):
+            print "deleted %s"%k.key
+            k.delete()
 
 def s3rm_delete_all(s3,bucket):
     b=s3.get_bucket(bucket)

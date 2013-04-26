@@ -11,16 +11,20 @@ def usage():
 #ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L1581
 def s3get_to_stdout(s3,bucket,key):
     b = s3.get_bucket(bucket) 
-    k = Key(b)
-    k.key = key
-    sys.stdout.write(k.get_contents_as_string())
+    k=b.get_key(key)
+    if isinstance(k,Key):
+        sys.stdout.write(k.get_contents_as_string())
+    else:
+        print "No such key %s" % key
 
 #ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L1515
 def s3get_to_filename(s3,bucket,key,filename):
     b = s3.get_bucket(bucket) 
-    k = Key(b)
-    k.key = key
-    k.get_contents_to_filename(filename)
+    k=b.get_key(key)
+    if isinstance(k,Key):
+        k.get_contents_to_filename(filename)
+    else:
+        print "No such key %s" % key
 
 if __name__ == "__main__":
     try:
