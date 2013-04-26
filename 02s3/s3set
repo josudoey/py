@@ -40,7 +40,7 @@ if __name__ == "__main__":
     key=None
     value=None
     filename=None
-    meta="{}"
+    meta=None
     for o, a in opts:
         if o in ("-b", "--bucekt"):
             bucket = a

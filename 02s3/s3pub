@@ -18,8 +18,12 @@ def s3pub_make_public(s3,bucket,key,sec=None):
         if sec:
             url=k.generate_url(sec,force_http=True)
         else:
+            k.make_public()
             url=k.generate_url(0,force_http=True,query_auth=False)
         print url
+        acp = k.get_acl()
+        for grant in acp.acl.grants:
+            print grant.permission, grant.display_name, grant.email_address, grant.id
     else:
         print "No such key %s" % key
 
