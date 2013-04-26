@@ -11,9 +11,11 @@ def usage():
 #ref https://github.com/boto/boto/blob/develop/boto/s3/key.py#L413
 def s3cp(s3,bucket,key,dstbucket,dstkey):
     b = s3.get_bucket(bucket) 
-    k = Key(b)
-    k.key = key
-    k.copy(dstbucket,dstkey)
+    k=b.get_key(key)
+    if isinstance(k,Key):
+        k.copy(dstbucket,dstkey)
+    else:
+        print "No such key %s" % key
 
 if __name__ == "__main__":
     try:
