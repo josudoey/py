@@ -4,6 +4,7 @@ import boto
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 import getopt, sys
+import os
 
 def usage():
     print """useage: s3get -b <bucket> -k <key> [ -f <file> ]"""
@@ -22,6 +23,8 @@ def s3get_to_filename(s3,bucket,key,filename):
     b = s3.get_bucket(bucket) 
     k=b.get_key(key)
     if isinstance(k,Key):
+        if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
         k.get_contents_to_filename(filename)
     else:
         print "No such key %s" % key
