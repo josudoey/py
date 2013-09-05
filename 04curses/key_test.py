@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+# coding=utf8
 #ref http://docs.python.org/2/library/curses.html
 import curses
 if __name__=="__main__":
+    import locale
+    locale.setlocale(locale.LC_ALL, '')
+
     scr = curses.initscr()
     curses.noecho()
     curses.cbreak();scr.keypad(1)
@@ -12,7 +16,7 @@ if __name__=="__main__":
     scr.clear()
 
     scr.attrset(curses.color_pair(2))
-    scr.addstr(0,0,"Input key :")
+    scr.addstr(0,0,"Input key:")
     scr.addstr(1,0,"")
     scr.attrset(curses.color_pair(1))
 
