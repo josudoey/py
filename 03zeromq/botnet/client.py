@@ -4,14 +4,12 @@ import zmq
 import sys
 import random
 
-
 port = "15559"
 context = zmq.Context()
 print "Connecting to server..."
 socket = context.socket(zmq.REQ)
 socket.connect ("tcp://localhost:%s" % port)
 client_id = random.randrange(1,10005)
-#  Do 10 requests, waiting each time for a response
 
 json_dict={
         "worker_id":"",
@@ -21,7 +19,6 @@ json_dict={
         "sum":0
 }
  
-sum=0
 for i in range (1,10):
     json_dict["a"]=i
     json_dict["b"]=json_dict["sum"]
