@@ -59,7 +59,7 @@ class ShowEnv():
         req = Request(environ)  
         res = Response()  
         res.status = "200 OK"  
-        res.content_type = "text/plain"  
+        res.content_type = "text/plain" 
         res.body =  pformat(environ,indent=4)
         return res(environ,start_response)  
     @classmethod  

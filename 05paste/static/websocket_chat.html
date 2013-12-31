@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script>
+window.onload = function() {
+  var data = {};
+  var ws_uri="ws://"+window.location.host+"/chat";
+  var s = new WebSocket(ws_uri);
+  s.onopen = function() {
+    $("#chat").append("<div>(" + ws_uri + ") connect success. </div>");
+    s.send('New participant joined');
+  };
+  s.onmessage = function(e) {
+    $("#chat").append("<div>" + e.data + "</div>");
+  };
+  $('#chatform').submit(function (evt) {
+    var line = $('#chatform [type=text]').val()
+    $('#chatform [type=text]').val('')
+    s.send(line);
+    return false;
+  });
+};
+</script>
+</head>
+<body>
+<h3>Chat!</h3>
+<p>(Only tested in Chrome)</p>
+<div id="chat" style="width: 60em; height: 20em; overflow:auto; border: 1px solid black">
+</div>
+<form id="chatform">
+<input type="text" />
+<input type="submit" />
+</form>
+</body>
+</html>
+

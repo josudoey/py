@@ -17,14 +17,14 @@ log = logging.getLogger(__name__)
 
 
 
-def background(_pool,*args,**kwargs): 
+def background(*args,**kwargs): 
     while True:
         greenthread.sleep(2) 
         print "greenthread count: %d" % len(_pool.coroutines_running)
     return  
 
 
-def server_start(_scok,_app_pool,*args,**kwargs):
+def server_start(*args,**kwargs):
     wsgi.server( _sock
                 ,_app
                 ,custom_pool=_pool
