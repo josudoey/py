@@ -43,7 +43,10 @@ def websocket_chat_app(environ, start_response):
     try:
         while True:
             t = datetime.now().strftime('%H:%M:%S')
-            m ="%s[%s]: %s" % (rip,t,escape(ws.receive()))
+            data = ws.receive()
+            if data is None:
+                break
+            m ="%s[%s]: %s" % (rip,t,escape(data))
             if m is None:
                 break
             for p in participants:
