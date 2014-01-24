@@ -1,35 +1,20 @@
 #!/usr/bin/env python
 import os
 import eventlet 
-from paste.deploy import loadapp  
-from paste.deploy import loadserver  
-import eventlet
-import time 
-import eventlet 
 from eventlet import wsgi
-from eventlet import greenthread
 from eventlet import event
+from paste.deploy import loadapp  
+import time 
 eventlet.monkey_patch() 
 
-import logging
-import os
-log = logging.getLogger(__name__)
-
-
-
-def background(*args,**kwargs): 
+def background(pool,*args,**kwargs): 
     while True:
-        greenthread.sleep(2) 
-        print "greenthread count: %d" % len(_pool.coroutines_running)
+        time.sleep(2) 
+        print "greenthread count: %d" % len(pool.coroutines_running)
     return  
 
-
-def server_start(*args,**kwargs):
-    wsgi.server( _sock
-                ,_app
-                ,custom_pool=_pool
-                )
-
+def server_start(sock,app,pool):
+    wsgi.server( sock ,app ,custom_pool=pool )
 
 if __name__ == '__main__':
     configfile="paste.ini"  
@@ -39,6 +24,6 @@ if __name__ == '__main__':
 
     _pool = eventlet.GreenPool(100)  
     _pool.spawn_n(background,_pool) 
-    _pool.spawn(server_start,_sock,_app,_pool) 
+    _pool.spawn_n(server_start,_sock,_app,_pool) 
     ent = event.Event()
     ent.wait()
