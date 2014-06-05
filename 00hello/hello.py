@@ -6,7 +6,8 @@ from collections import OrderedDict
 from fajoy import config
 log = logging.getLogger()
 
-def enable_log(path,logger=log,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'):
+def enable_log(path,logger=log,
+        format=logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')):
     fn=os.path.normpath(os.path.join(os.path.dirname(__file__),path))
     if os.path.isabs(path):
         fn=path
@@ -62,7 +63,7 @@ def main():
     name = args.name or "%s%s" % (conf.get("name"),"(%s)" % conf.get("mail") if conf.has_key("mail") else "")
     msg = " ".join(args.msg) or "hello"
 
-    e = Exception("e")
+    e = Exception("test")
     log.exception(e)
     print "%s : %s" %(name,msg)
 
