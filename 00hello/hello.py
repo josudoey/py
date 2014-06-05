@@ -5,7 +5,6 @@ import logging
 from collections import OrderedDict
 from fajoy import config
 log = logging.getLogger()
-log.setLevel(logging.WARNING)
 
 def enable_log(path,logger=log,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'):
     fn=os.path.normpath(os.path.join(os.path.dirname(__file__),path))
@@ -41,7 +40,6 @@ def main():
 
     log_fmt="%(asctime)s - [%(threadName)s:%(name)s.%(funcName)s((%(lineno)d))] - %(levelname)s - %(message)s"
 
-    log_fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     if conf.has_key("log_format"):
         log_fmt=conf["log_format"]
 
