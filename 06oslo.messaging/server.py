@@ -30,14 +30,24 @@ class ServerControlEndpoint(object):
         self.server.stop()
 
 class TestEndpoint(object):
-    def test22(self, ctxt, arg):
-        d ={ "pid":os.getpid(),
-              "server":_server , 
+    def hello(self, ctxt,*args,**kwargs):
+        d ={   "pid":os.getpid(),
+               "server":_server , 
                "ctxt" :ctxt , 
-               "arg": arg
+               "args" :args , 
+               "kwargs" :kwargs , 
             }
         print d
-        print self.__dict__
+        return d
+
+    def hello_kw(self, ctxt, *args,**kwargs):
+        d ={   "pid":os.getpid(),
+               "server":_server , 
+               "ctxt" :ctxt , 
+               "args" :args , 
+               "kwargs" :kwargs , 
+            }
+        print d
         return d
 
 def main():
@@ -53,6 +63,7 @@ def main():
 
     ctrl=ServerControlEndpoint()
     endpoints = [
+        ctrl,
         TestEndpoint(),
     ]
     print("topic:%s.%s"%(topic,_server))
