@@ -20,7 +20,6 @@ def parse_args(argv, default_config_files=None):
 
 class TestClient(object):
     def __init__(self, transport):
-        _server=os.getpid()
         self.topic='oslo.server'
         target = messaging.Target(topic=self.topic,
             version='1.0',
