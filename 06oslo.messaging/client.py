@@ -8,7 +8,6 @@ from oslo import messaging
 import eventlet
 eventlet.monkey_patch()
 
-_server=os.getpid()
 #logging.basicConfig(level=logging.DEBUG)
 log=logging.getLogger(__name__)
 CONF=cfg.CONF
@@ -22,19 +21,19 @@ def parse_args(argv, default_config_files=None):
 class TestClient(object):
 
     def __init__(self, transport):
-        target = messaging.Target(topic='#',
-        server=_server,
-        version='1.0',
-        fanout=False)
+        _server=os.getpid()
+        target = messaging.Target(topic='oslo.server',
+            version='1.0',
+            fanout=True)
         self._client = messaging.RPCClient(transport, target)
         self._client.prepare(timeout=5)
 
     def test(self, ctxt, arg):
-        return self._client.call(ctxt, 'test', arg=arg)
+        return self._client.call(ctxt, 'test22', arg=arg)
 
 def main():
     parse_args(sys.argv,
-        default_config_files=(os.path.join(os.path.dirname(__file__),'etc/rpc/server.conf'),)
+        default_config_files=(os.path.join(os.path.dirname(__file__),'etc/rpc/client.conf'),)
         )
     ctxt={}
     arg={}

@@ -10,8 +10,8 @@ eventlet.monkey_patch()
 
 #logging.basicConfig(level=logging.DEBUG)
 CONF=cfg.CONF
-_server=__file__
 
+_server=os.getpid()
 def parse_args(argv, default_config_files=None):
     CONF(argv[1:],
             project='rpc',
@@ -20,20 +20,24 @@ def parse_args(argv, default_config_files=None):
 
 class ServerControlEndpoint(object):
 
-    def __init__(self, server):
+    def __init__(self):
+        pass
+
+    def setup(self, server):
         self.server = server
 
     def stop(self, ctx):
         self.server.stop()
 
 class TestEndpoint(object):
-    def test(self, ctxt, arg):
+    def test22(self, ctxt, arg):
         d ={ "pid":os.getpid(),
               "server":_server , 
                "ctxt" :ctxt , 
                "arg": arg
             }
         print d
+        print self.__dict__
         return d
 
 def main():
@@ -41,17 +45,19 @@ def main():
         default_config_files=(os.path.join(os.path.dirname(__file__),'etc/rpc/server.conf'),)
         )
     transport = messaging.get_transport(CONF)
-    topic="#.%s"%os.getpid()
+    topic="oslo.server"
     target = messaging.Target(
         topic=topic,
         server=_server,
-        fanout=False)
+        )
+
+    ctrl=ServerControlEndpoint()
     endpoints = [
-        ServerControlEndpoint(None),
         TestEndpoint(),
     ]
-    print("topic:%s"%topic)
+    print("topic:%s.%s"%(topic,_server))
     server = messaging.get_rpc_server(transport, target, endpoints ,executor="eventlet")
+    ctrl.setup(server)
     server.start()
     server.wait()
 
