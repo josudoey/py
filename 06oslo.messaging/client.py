@@ -28,7 +28,7 @@ def parse_args(argv, default_config_files=None):
 class HelloClient(object):
     def __init__(self, ctxt):
         self.ctxt = ctxt
-        self.topic='oslo2.server'
+        self.topic='hello.server'
         target = messaging.Target(topic=self.topic,
             version='1.0',
             fanout=False,
@@ -83,7 +83,7 @@ def main():
     try:
         c.ohno()
     except exception.HelloException as e:
-        print e.message
+        print e.format_message()
     #c.stop_server({})
     #.stop_all_server({})
 

@@ -57,14 +57,15 @@ class TestEndpoint(object):
         return d
 
     def ohno(self, ctxt, *args,**kwargs):
-        raise exception.HelloException("oops")
+        print ctxt.__dict__
+        raise exception.OopsException(name=ctxt.name)
 
 def main():
     parse_args(sys.argv,
         default_config_files=(os.path.join(os.path.dirname(__file__),'etc/rpc/server.conf'),)
     )
     rpc.init(CONF)
-    topic="oslo2.server"
+    topic="hello.server"
     server_name = os.getpid()
 
     target = messaging.Target(
