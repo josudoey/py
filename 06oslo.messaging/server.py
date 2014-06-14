@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 #ref http://docs.openstack.org/developer/oslo.messaging/server.html
+import sys,os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+
 import logging
 
 from oslo.config import cfg
 from oslo import messaging
 import sys,os
 import eventlet
+
+from hello import rpc
+from hello import exception
 eventlet.monkey_patch()
 
 #logging.basicConfig(level=logging.DEBUG)
@@ -35,7 +41,6 @@ class TestEndpoint(object):
     def hello(self, ctxt,*args,**kwargs):
         d ={   "pid":os.getpid(),
                "server":self.server_name , 
-               "ctxt" :ctxt , 
                "args" :args , 
                "kwargs" :kwargs , 
             }
@@ -45,19 +50,21 @@ class TestEndpoint(object):
     def hello_kw(self, ctxt, *args,**kwargs):
         d ={   "pid":os.getpid(),
                "server":self.server_name , 
-               "ctxt" :ctxt , 
                "args" :args , 
                "kwargs" :kwargs , 
             }
         print d
         return d
 
+    def ohno(self, ctxt, *args,**kwargs):
+        raise exception.HelloException("oops")
+
 def main():
     parse_args(sys.argv,
         default_config_files=(os.path.join(os.path.dirname(__file__),'etc/rpc/server.conf'),)
     )
-    transport = messaging.get_transport(CONF)
-    topic="oslo.server"
+    rpc.init(CONF)
+    topic="oslo2.server"
     server_name = os.getpid()
 
     target = messaging.Target(
@@ -72,7 +79,7 @@ def main():
     ]
 
     print("topic:%s.%s"%(topic,server_name))
-    server = messaging.get_rpc_server(transport, target, endpoints ,executor="eventlet")
+    server = rpc.get_server( target, endpoints)
     ctrl.setup(server)
     server.start()
     server.wait()

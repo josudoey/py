@@ -1,10 +1,18 @@
 #!/usr/bin/env python
 #ref http://docs.openstack.org/developer/oslo.messaging/rpcclient.html
+import sys,os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__) ))
 import logging
 
 import sys,os
 from oslo.config import cfg
 from oslo import messaging
+
+
+from hello import rpc
+from hello.context import RequestContext
+from hello import exception
+
 import eventlet
 eventlet.monkey_patch()
 
@@ -17,63 +25,67 @@ def parse_args(argv, default_config_files=None):
             prog='client',
             default_config_files=default_config_files)
 
-
-class TestClient(object):
-    def __init__(self, transport):
-        self.topic='oslo.server'
+class HelloClient(object):
+    def __init__(self, ctxt):
+        self.ctxt = ctxt
+        self.topic='oslo2.server'
         target = messaging.Target(topic=self.topic,
             version='1.0',
             fanout=False,
             )
-        self._client = messaging.RPCClient(transport, target)
+        self._client = rpc.get_client( target)
 
-    def stop_all_server(self, ctxt):
+    def stop_all_server(self):
         __client = self._client.prepare(fanout=True)
-        return __client.cast(ctxt, 'stop')
+        return __client.cast(self.ctxt, 'stop')
 
-    def stop_server(self, ctxt):
-        return self._client.cast(ctxt, 'stop')
+    def stop_server(self):
+        return self._client.cast(self.ctxt, 'stop')
  
-    def all_hello(self, ctxt, arg=None):
+    def all_hello(self, arg=None):
         __client =self._client.prepare(fanout=True)
-        return __client.cast(ctxt, 'hello', arg=arg)
+        return __client.cast(self.ctxt, 'hello', arg=arg)
 
-    def hello(self, ctxt,*args):
-        return self._client.call(ctxt, 'hello',arg=args )
+    def hello(self,*args):
+        return self._client.call(self.ctxt, 'hello',arg=args )
     
-    def hello_kw(self, ctxt,**kwargs):
-        return self._client.call(ctxt, 'hello_kw',arg=kwargs)
+    def hello_kw(self,**kwargs):
+        return self._client.call(self.ctxt, 'hello_kw',arg=kwargs)
 
-    def assign_hello(self, ctxt,server=None,*args):
+    def assign_hello(self,server=None,*args):
         __client = self._client.prepare(topic = self.topic)
         if  server:
-            __client = self._client.prepare(topic = "oslo.server.%s"%server)
-        return __client.call(ctxt, 'hello',arg=args )
+            __client = self._client.prepare(topic = "%s.%s"%(self.topic,server))
+        return __client.call(self.ctxt, 'hello',arg=args )
+
+    def ohno(self,**kwargs):
+        return self._client.call(self.ctxt, 'ohno',arg=kwargs)
+
+
 
 def main():
     parse_args(sys.argv,
         default_config_files=(os.path.join(os.path.dirname(__file__),'etc/rpc/client.conf'),)
         )
-    ctxt={"ctxt":"hello"}
-    transport = messaging.get_transport(CONF)
-    c=TestClient(transport)
+    rpc.init(CONF)
+    c=HelloClient(RequestContext("fajoy"))
     ret={}
 
-    print c.all_hello(ctxt)
+    print c.all_hello()
     for i in range(3):
-        ctxt["i"]=i
-        print c.hello(ctxt,"hello","world","wow!!!!")
-        ret = c.hello_kw(ctxt,a="hello_kw",b="world",c="wow!!!!")
+        print c.hello("hello",str(i))
+        ret = c.hello_kw(a="hello_kw",b="world",c="wow!!!!",i=str(i))
         print ret
 
     after_server_name = ret.get("server",None)
     for i in range(10):
-        ctxt["i"]=i
-        print c.assign_hello(ctxt,after_server_name,"only","you",)
-
-
+        print c.assign_hello(after_server_name,"only","you",str(i))
+    try:
+        c.ohno()
+    except exception.HelloException as e:
+        print e.message
     #c.stop_server({})
-    #c.stop_all_server({})
+    #.stop_all_server({})
 
 if __name__ == '__main__':
     main()
