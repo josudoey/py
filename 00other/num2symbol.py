@@ -14,11 +14,12 @@ class u:
         i=int(math.log(size,2)/10)
         if i==0:
            return s
-	if i>4:
-	    i=4
+        if i>4:
+            i=4
         f=float(size)/(2**(i*10))
         r="%.1f"%f
         return r+t[i-1]
+
     @staticmethod
     def conv(t):
         i=0
